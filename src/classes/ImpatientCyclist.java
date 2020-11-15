@@ -2,22 +2,24 @@ package classes;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Objects;
-import java.util.concurrent.*;
+import java.util.concurrent.Phaser;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
-public class Cyclist implements Runnable{
+public class ImpatientCyclist implements Runnable{
 
     private final String name;
     private final Phaser phaser;
-    private final DateTimeFormatter f = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private DateTimeFormatter f = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    public Cyclist(String name, Phaser phaser){
+    public ImpatientCyclist(String name, Phaser phaser){
         Objects.requireNonNull(name);
         Objects.requireNonNull(phaser);
         this.name = name;
         this.phaser = phaser;
     }
-    @Override
     public void run() {
         phaser.register();
         // 1. Sale de casa y se dirige a la gasolinera. Tarda entre 1 y 3 segundos
@@ -28,13 +30,8 @@ public class Cyclist implements Runnable{
             return;
         }
 
-        // 2. Espere que llegue todo el mundo
-        try {
-            phaser.awaitAdvanceInterruptibly(phaser.arrive());
-        } catch (InterruptedException e) {
-            System.out.printf("%s has been interrupted while waiting in the Petrol Station\n", name);
-        }
-
+        // 2. No espera a que llegue todo el mundo
+        phaser.arriveAndDeregister();
         // 3. Una vez que llegue todo el mundo comienza la etapa.
         //  Llegan a una venta de entre 5 y 10 segundos, lo indica
         try {
@@ -42,26 +39,15 @@ public class Cyclist implements Runnable{
         } catch (InterruptedException e) {
             System.out.printf("%s has been interrupted while waiting in the Disposal\n", name);
         }
-        // 4. Espera a que llegue los demás
-        try {
-            phaser.awaitAdvanceInterruptibly(phaser.arrive());
-        } catch (InterruptedException e) {
-            System.out.printf("%s has been interrupted while waiting in the Disposal\n", name);
-        }
 
-        // 5. Vuelven a la gasolinera. Suelen tardar el mismo tiempo.
+        // 4. Vuelve a la gasolinera. Suelen tardar el mismo tiempo.
         try {
             goBackToThePetrolStation();
         } catch (InterruptedException e) {
             System.out.printf("%s has been interrupted while going back to the Petrol Station\n", name);
         }
-        // 6. Espera a que llegue todo el mundo
-        try {
-            phaser.awaitAdvanceInterruptibly(phaser.arrive());
-        } catch (InterruptedException e) {
-            System.out.printf("%s has been interrupted while waiting in the Petrol Station\n", name);
-        }
-        // 7. Etapa finalizada y vuelve para su casa, tarda entre 1 y 3 segundos.
+
+        // 5. Etapa finalizada y vuelve para su casa, tarda entre 1 y 3 segundos.
         try {
             goBackHome();
         } catch (InterruptedException e) {
