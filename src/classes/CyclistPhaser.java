@@ -16,15 +16,15 @@ public class CyclistPhaser extends Phaser {
     protected boolean onAdvance(int phase, int registeredParties) {
         switch (phase){
             case ARRIVE_TO_PETROL_STATION_PHASE:
-                System.out.printf("%s -> All %d cyclists arrived to peatrol station (excuted in %s)",
+                System.out.printf("%s -> All %d cyclists arrived to peatrol station (excuted in %s)\n",
                         LocalDateTime.now().format(f), registeredParties, Thread.currentThread().getName());
                 break;
             case FINISH_PHASER_ONE:
-                System.out.printf("%s -> All %d cyclists finished their first phase",
+                System.out.printf("%s -> All %d cyclists finished their first phase\n",
                         LocalDateTime.now().format(f), registeredParties, Thread.currentThread().getName());
                 break;
             case FINISH_PHASER_TWO:
-                System.out.printf("%s -> All %d cyclists finished their second phase",
+                System.out.printf("%s -> All %d cyclists finished their second phase\n",
                         LocalDateTime.now().format(f), registeredParties, Thread.currentThread().getName());
                 return true;
         }
