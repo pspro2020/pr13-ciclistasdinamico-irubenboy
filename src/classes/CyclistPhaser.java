@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Phaser;
 
 public class CyclistPhaser extends Phaser {
-    public static final int ARRIVE_TO_PEATROL_STATION_PHASE = 0;
+    public static final int ARRIVE_TO_PETROL_STATION_PHASE = 0;
     public static final int FINISH_PHASER_ONE = 1;
     public static final int FINISH_PHASER_TWO = 2;
 
@@ -15,7 +15,7 @@ public class CyclistPhaser extends Phaser {
     @Override
     protected boolean onAdvance(int phase, int registeredParties) {
         switch (phase){
-            case ARRIVE_TO_PEATROL_STATION_PHASE:
+            case ARRIVE_TO_PETROL_STATION_PHASE:
                 System.out.printf("%s -> All %d cyclists arrived to peatrol station (excuted in %s)",
                         LocalDateTime.now().format(f), registeredParties, Thread.currentThread().getName());
                 break;
