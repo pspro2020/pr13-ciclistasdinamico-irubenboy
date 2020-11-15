@@ -3,22 +3,19 @@ package classes;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class Cyclist implements Runnable{
 
     private final String name;
-    private final CyclicBarrier cyclicBarrier;
+    private final Phaser phaser;
     private final DateTimeFormatter f = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    public Cyclist(String name, CyclicBarrier cyclicBarrier){
+    public Cyclist(String name, Phaser phaser){
         Objects.requireNonNull(name);
-        Objects.requireNonNull(cyclicBarrier);
+        Objects.requireNonNull(phaser);
         this.name = name;
-        this.cyclicBarrier = cyclicBarrier;
+        this.phaser = phaser;
     }
     @Override
     public void run() {
@@ -32,11 +29,9 @@ public class Cyclist implements Runnable{
 
         // 2. Espere que llegue todo el mundo
         try {
-            cyclicBarrier.await();
+            phaser.awaitAdvanceInterruptibly(phaser.arrive());
         } catch (InterruptedException e) {
             System.out.printf("%s has been interrupted while waiting in the Petrol Station\n", name);
-        } catch (BrokenBarrierException e) {
-            System.out.printf("%s doesn't wait anymore in the Petrol Station because anyone isn't coming\n", name);
         }
 
         // 3. Una vez que llegue todo el mundo comienza la etapa.
@@ -48,12 +43,11 @@ public class Cyclist implements Runnable{
         }
         // 4. Espera a que llegue los demás
         try {
-            cyclicBarrier.await();
+            phaser.awaitAdvanceInterruptibly(phaser.arrive());
         } catch (InterruptedException e) {
             System.out.printf("%s has been interrupted while waiting in the Disposal\n", name);
-        } catch (BrokenBarrierException e) {
-            System.out.printf("%s doesn't wait anymore in the Disposal because anyone isn't coming\n", name);
         }
+
         // 5. Vuelven a la gasolinera. Suelen tardar el mismo tiempo.
         try {
             goBackToThePetrolStation();
@@ -62,11 +56,9 @@ public class Cyclist implements Runnable{
         }
         // 6. Espera a que llegue todo el mundo
         try {
-            cyclicBarrier.await();
+            phaser.awaitAdvanceInterruptibly(phaser.arrive());
         } catch (InterruptedException e) {
             System.out.printf("%s has been interrupted while waiting in the Petrol Station\n", name);
-        } catch (BrokenBarrierException e) {
-            System.out.printf("%s doesn't wait anymore in the Petrol Station because anyone isn't coming\n", name);
         }
         // 7. Etapa finalizada y vuelve para su casa, tarda entre 1 y 3 segundos.
         try {
